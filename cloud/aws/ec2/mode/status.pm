@@ -109,6 +109,7 @@ sub new {
     $options{options}->add_options(arguments => {
         'type:s'	        => { name => 'type' },
         'name:s@'	        => { name => 'name' },
+        'system-only'       => { name => 'system_only' },
         'warning-status:s'  => { name => 'warning_status', default => '' },
         'critical-status:s' => { name => 'critical_status', default => '%{status} =~ /failed/i' }
     });
@@ -145,8 +146,9 @@ sub check_options {
     $self->{aws_period} = defined($self->{option_results}->{period}) ? $self->{option_results}->{period} : 60;
     $self->{aws_statistics} = ['Average'];
 
-    foreach my $metric ('StatusCheckFailed_Instance', 'StatusCheckFailed_System') {
+    foreach my $metric ('StatusCheckFailed_System', 'StatusCheckFailed_Instance') {
         push @{$self->{aws_metrics}}, $metric;
+        last if (defined($self->{option_results}->{system_only}));
     }
 
     $self->change_macros(macros => ['warning_status', 'critical_status']);

@@ -25,7 +25,7 @@ use base qw(centreon::plugins::templates::counter);
 use strict;
 use warnings;
 use Digest::MD5 qw(md5_hex);
-use centreon::plugins::templates::catalog_functions qw(catalog_status_threshold);
+use centreon::plugins::templates::catalog_functions qw(catalog_status_threshold_ng);
 
 sub custom_status_output {
     my ($self, %options) = @_;
@@ -44,6 +44,12 @@ sub custom_status_calc {
     return 0;
 }
 
+sub prefix_input_output {
+    my ($self, %options) = @_;
+    
+    return "Input '" . $options{instance_value}->{name} . "' ";
+}
+
 sub set_counters {
     my ($self, %options) = @_;
     
@@ -52,7 +58,7 @@ sub set_counters {
     ];
     
     $self->{maps_counters}->{input} = [
-         { label => 'status', threshold => 0, set => {
+         { label => 'status', type => 2, set => {
                 key_values => [ { name => 'active' }, { name => 'name' }, { name => 'error' } ],
                 closure_custom_calc => $self->can('custom_status_calc'),
                 closure_custom_output => $self->can('custom_status_output'),
@@ -79,25 +85,10 @@ sub new {
     bless $self, $class;
     
     $options{options}->add_options(arguments => {
-        'filter-name:s'     => { name => 'filter_name' },
-        'warning-status:s'  => { name => 'warning_status' },
-        'critical-status:s' => { name => 'critical_status' }
+        'filter-name:s'     => { name => 'filter_name' }
     });
 
     return $self;
-}
-
-sub check_options {
-    my ($self, %options) = @_;
-    $self->SUPER::check_options(%options);
-
-    $self->change_macros(macros => ['warning_status', 'critical_status']);
-}
-
-sub prefix_input_output {
-    my ($self, %options) = @_;
-    
-    return "Input '" . $options{instance_value}->{name} . "' ";
 }
 
 sub manage_selection {

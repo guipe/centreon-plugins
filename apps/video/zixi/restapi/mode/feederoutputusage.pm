@@ -25,7 +25,7 @@ use base qw(centreon::plugins::templates::counter);
 use strict;
 use warnings;
 use centreon::plugins::misc;
-use centreon::plugins::templates::catalog_functions qw(catalog_status_threshold);
+use centreon::plugins::templates::catalog_functions qw(catalog_status_threshold_ng);
 
 sub custom_status_output {
     my ($self, %options) = @_;
@@ -34,15 +34,10 @@ sub custom_status_output {
     return $msg;
 }
 
-sub custom_status_calc {
+sub prefix_output_output {
     my ($self, %options) = @_;
     
-    $self->{result_values}->{active} = $options{new_datas}->{$self->{instance} . '_active'};
-    $self->{result_values}->{name} = $options{new_datas}->{$self->{instance} . '_name'};
-    $self->{result_values}->{error} = $options{new_datas}->{$self->{instance} . '_error'};
-    $self->{result_values}->{con_stat} = $options{new_datas}->{$self->{instance} . '_con_stat'};
-    
-    return 0;
+    return "Output '" . $options{instance_value}->{name} . "' ";
 }
 
 sub set_counters {
@@ -53,24 +48,23 @@ sub set_counters {
     ];
     
     $self->{maps_counters}->{output_stream} = [
-         { label => 'status', threshold => 0, set => {
+         { label => 'status', type => 2, set => {
                 key_values => [ { name => 'active' }, { name => 'name' }, { name => 'error' }, { name => 'con_stat' } ],
-                closure_custom_calc => $self->can('custom_status_calc'),
                 closure_custom_output => $self->can('custom_status_output'),
                 closure_custom_perfdata => sub { return 0; },
-                closure_custom_threshold_check => \&catalog_status_threshold,
+                closure_custom_threshold_check => \&catalog_status_threshold_ng
             }
         },
-         { label => 'current-bitrate', set => {
+         { label => 'current-bitrate', nlabel => 'feedoutput.traffic.out.usage.bytes.', set => {
                 key_values => [ { name => 'bitrate' }, { name => 'name' } ],
                 output_change_bytes => 2,
-                output_template => 'Current Bitrate : %s %s/s',
+                output_template => 'current bitrate : %s %s/s',
                 perfdatas => [
-                    { label => 'current_bitrate', value => 'bitrate', template => '%.2f',
-                      min => 0, unit => 'b/s', label_extra_instance => 1, instance_use => 'name' },
-                ],
+                    { label => 'current_bitrate', template => '%.2f',
+                      min => 0, unit => 'b/s', label_extra_instance => 1, instance_use => 'name' }
+                ]
             }
-        },
+        }
     ];
 }
 
@@ -79,27 +73,11 @@ sub new {
     my $self = $class->SUPER::new(package => __PACKAGE__, %options);
     bless $self, $class;
     
-    $options{options}->add_options(arguments =>
-                                {
-                                  "filter-name:s"           => { name => 'filter_name' },
-                                  "warning-status:s"        => { name => 'warning_status' },
-                                  "critical-status:s"       => { name => 'critical_status' },
-                                });
-   
+    $options{options}->add_options(arguments => {
+        "filter-name:s" => { name => 'filter_name' }
+    });
+
     return $self;
-}
-
-sub check_options {
-    my ($self, %options) = @_;
-    $self->SUPER::check_options(%options);
-
-    $self->change_macros(macros => ['warning_status', 'critical_status']);
-}
-
-sub prefix_output_output {
-    my ($self, %options) = @_;
-    
-    return "Output '" . $options{instance_value}->{name} . "' ";
 }
 
 sub manage_selection {

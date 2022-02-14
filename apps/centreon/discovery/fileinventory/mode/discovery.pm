@@ -32,10 +32,10 @@ sub new {
     bless $self, $class;
 
     $options{options}->add_options(arguments => {
-        'prettify'      => { name => 'prettify' },
+        'delimiter:s'   => { name => 'delimiter' },
         'input-file:s'  => { name => 'input_file'},
         'line-format:s' => { name => 'line_format' },
-        'delimiter:s'   => { name => 'delimiter' }
+        'prettify'      => { name => 'prettify' }
     });
 
     return $self;
@@ -143,18 +143,18 @@ Prettify JSON output.
 =item B<--input-file>
 
 *MANDATORY*
-Specify the path of the Inventory file.
+Specify the path of the Inventory file. The file must be readable by the user 'centreon-gorgone'.
 Example: "--input-file='/tmp/my_inventory_file.csv"
-
-=item B<--line-format>
-
-*MANDATORY*
-Specify the format of the the fields in file.
-Example: "--line-format='name;ip;alias;devicetype;geo_coords"
 
 =item B<--delimiter>
 
 Define the fields delimiter (Default: ';').
+
+=item B<--line-format>
+
+*MANDATORY*
+Specify the format of the the fields in file, separated by the delimiter defined.
+Example: "--line-format='name;ip;alias;devicetype;geo_coords"
 
 =back
 

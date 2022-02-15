@@ -56,7 +56,7 @@ sub check_options {
 
     $self->{input_file} = defined($self->{option_results}->{input_file})  && $self->{option_results}->{input_file} ne '' ? $self->{option_results}->{input_file} : '';
     $self->{line_format} = defined($self->{option_results}->{line_format})  && $self->{option_results}->{line_format} ne '' ? $self->{option_results}->{line_format} : '';
-    $self->{delimiter} = defined($self->{option_results}->{delimiter})  && $self->{option_results}->{delimiter} ne '' ? $self->{option_results}->{delimiter} : ';';
+    $self->{delimiter} = defined($self->{option_results}->{delimiter})  && $self->{option_results}->{delimiter} ne '' ? $self->{option_results}->{delimiter} : '';
 }
 
 sub parse_file {
@@ -67,7 +67,7 @@ sub parse_file {
 
     $self->{input_file} =~ /([^.]+)$/;
 
-    if (lc($1) eq 'csv' ) {
+    if (lc($1) =~ m/csv|txt/) {
         while (my $line = <$fh>) {
             my $data;
             chomp $line;
@@ -79,7 +79,7 @@ sub parse_file {
                 $self->{output}->option_exit();
             }
             for (my $i = 0; $i < scalar(@fields); $i++) {
-                $data->{ $options{mapping}->{$i} } = $fields[$i];
+                $data->{ lc($options{mapping}->{$i}) } = $fields[$i];
             }
             push @$results, $data;
         }
@@ -132,7 +132,7 @@ __END__
 
 =head1 MODE
 
-Centreon CSV File Inventory discovery.
+Centreon csv/txt File Inventory discovery.
 
 =over 8
 
@@ -145,16 +145,17 @@ Prettify JSON output.
 *MANDATORY*
 Specify the path of the Inventory file. The file must be readable by the user 'centreon-gorgone'.
 Example: "--input-file='/tmp/my_inventory_file.csv"
-
-=item B<--delimiter>
-
-Define the fields delimiter (Default: ';').
+Managed extensions: '.csv', '.txt'.
 
 =item B<--line-format>
 
 *MANDATORY*
 Specify the format of the the fields in file, separated by the delimiter defined.
-Example: "--line-format='name;ip;alias;devicetype;geo_coords"
+Example: "--line-format='name;ip;alias;template;geocoords"
+
+=item B<--delimiter>
+
+Define the fields delimiter (Default: ';').
 
 =back
 

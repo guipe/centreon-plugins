@@ -68,7 +68,7 @@ stage('RPM Delivery') {
         checkout scm
         unstash "Debian11"
         sh '''
-               find -name "*.deb" -print0 | xargs -0 -t -I % -P 2 aws s3 cp % s3://apt-centreon-repo-alt/
+               find -name "*.deb" -print0 | xargs -0 -t -I % -P 2 curl -u testarti:Testartifactory1@ -X PUT https://artifactory.apps.centreon.com/artifactory/debian-22.04/all/devops/centreon/22.04.0-bullseye/% -T %
           '''   
       }
     }

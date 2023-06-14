@@ -84,6 +84,12 @@ sub get_port {
     return $self->{ssh_port};
 }
 
+sub is_libssh_backend {
+    my ($self, %options) = @_;
+
+    return $self->{ssh_backend} eq 'libssh' ? 1 : 0;
+}
+
 sub execute {
     my ($self, %options) = @_;
 

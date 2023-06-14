@@ -97,7 +97,10 @@ sub execute_command {
 
     $self->{ssh_commands} = 
         "set cli op-command-xml-output on\n" .
-        $options{command} . "\nexit\n";
+        $options{command} . "\n";
+    if (!$self->{ssh}->is_libssh_backend()) {
+        $self->{ssh_commands} .= "exit\n";
+    }
 
     my $stdout;
     if (defined($self->{option_results}->{hostname}) && $self->{option_results}->{hostname} ne '') {
@@ -150,6 +153,19 @@ sub execute_command {
     }
 
     return $result->{result};
+}
+
+sub DESTROY {
+    my $self = shift;
+
+    if ($self->{ssh}->is_libssh_backend()) {
+        $self->{ssh}->execute(
+            ssh_pipe => 1,
+            hostname => $self->{option_results}->{hostname},
+            command => "exit\n",
+            timeout => $self->{option_results}->{timeout}
+        );
+    }
 }
 
 1;

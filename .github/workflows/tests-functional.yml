@@ -1,12 +1,13 @@
-name: Functional tests
+name: functional-tests
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - tests*
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/functional/**'
 
 jobs:
-  AWS_tests:
+  functional-tests-with-robot:
     runs-on: ubuntu-latest
 
     steps:

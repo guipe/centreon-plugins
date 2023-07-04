@@ -108,8 +108,8 @@ my $map_ha_status = {
 };
 
 my $map_peer_status = {
-    0 => 'standalone', 1 => 'primary', 
-    2 => 'secondary', 3 => 'unknown', 
+    0 => 'standalone', 1 => 'secondary', 
+    2 => 'primary', 3 => 'unknown', 
 };
 
 sub manage_selection {
